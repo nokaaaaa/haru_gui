@@ -12,7 +12,7 @@ const ros = new ROSLIB.Ros({
 });
 ```
 [ROSを走らせるPCのローカルIP]に先程確認したipを入れる
-```
+
 実行方法
 ```
 cd [haru_guiのディレクトリ]
