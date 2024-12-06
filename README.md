@@ -4,7 +4,7 @@
 ```
 ip a
 ```
-これでipアドレスを確認する
+これでipアドレスを確認する  
 haru_gui/src/App.tsxにある
 ```
 const ros = new ROSLIB.Ros({
