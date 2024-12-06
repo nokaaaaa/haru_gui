@@ -1,5 +1,6 @@
 # これは何
-春ロボ2025用のコントローラー兼状態監視web gui
+春ロボ2025用のコントローラー兼状態監視web gui  
+![Screenshot from 2024-12-06 22-11-56](https://github.com/user-attachments/assets/29b70bd5-3c08-4dcb-8ebb-af2e0adc341c)
 # 使い方
 ```
 ip a
