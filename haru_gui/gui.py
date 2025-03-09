@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
     QGraphicsScene, QGraphicsView, QGraphicsRectItem, QLabel
 )
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QColor
+from PyQt6.QtGui import QColor, QPen
 import threading
 
 
@@ -31,6 +31,15 @@ class BoolPublisherNode(Node):
         self.pose = Pose2D()
         self.get_logger().info("BoolPublisherNode has started.")
 
+        # パラメタの宣言
+        self.declare_parameter('field_color', 'red')
+
+        # パラメタの取得
+        self.field_color = self.get_parameter('field_color').get_parameter_value().string_value
+
+        # 取得したパラメタの表示
+        self.get_logger().info(f'field_color: {self.field_color}')
+
     def publish_true(self, topic_name):
         if topic_name in self.publishers_dict:
             msg = Bool()
@@ -43,10 +52,11 @@ class BoolPublisherNode(Node):
 
 
 class PoseVisualizer(QGraphicsView):
-    def __init__(self, ros_node):
+    def __init__(self, ros_node, field_color):
         super().__init__()
 
         self.ros_node = ros_node
+        self.field_color = field_color
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
         self.setFixedSize(560, 1120)
@@ -56,7 +66,106 @@ class PoseVisualizer(QGraphicsView):
 
         self.scene.setSceneRect(0, 0, 560, 1120)
 
-        self.pose_rect = QGraphicsRectItem(-40, -40, 80, 80)
+        # 長方形を描画
+        self.boundary_rect = QGraphicsRectItem(30, 60, 490, 980)  # (x, y, width, height)
+        self.boundary_rect.setBrush(QColor('transparent'))
+        self.boundary_rect.setPen(QColor('black'))
+        self.scene.addItem(self.boundary_rect)
+
+        # デカルト座標をピクセル座標に変換する関数
+        def to_pixel_coords(x, y):
+            x_pixel = 30 + (x / 3.5) * 490
+            y_pixel = 1040 - (y / 7) * 980
+            return x_pixel, y_pixel
+        
+        # デカルト座標を x=1.75 で反転させる関数
+        def reflect_x(x):
+            return 2 * 1.75 - x
+
+        if self.field_color == "blue":
+            # デカルト座標の(0.9,1.5)と(0.9,5.5)を結ぶ線分を描画
+            x1, y1 = to_pixel_coords(0.9, 1.5)
+            x2, y2 = to_pixel_coords(0.9, 5.5)
+            line1 = self.scene.addLine(x1, y1, x2, y2, QPen(QColor('black')))
+
+            # デカルト座標の(2.95,1.5)と(2.95,5.5)を結ぶ線分を描画
+            x3, y3 = to_pixel_coords(2.95, 1.5)
+            x4, y4 = to_pixel_coords(2.95, 5.5)
+            line2 = self.scene.addLine(x3, y3, x4, y4, QPen(QColor('black')))
+
+            # デカルト座標の(0.9,1.5)と(1.9,1.5)を結ぶ線分を描画
+            x5, y5 = to_pixel_coords(0.9, 1.5)
+            x6, y6 = to_pixel_coords(1.9, 1.5)
+            line3 = self.scene.addLine(x5, y5, x6, y6, QPen(QColor('black')))
+
+            # デカルト座標の(0.9,3.5)と(1.9,3.5)を結ぶ線分を描画
+            x7, y7 = to_pixel_coords(0.9, 3.5)
+            x8, y8 = to_pixel_coords(1.9, 3.5)
+            line4 = self.scene.addLine(x7, y7, x8, y8, QPen(QColor('black')))
+
+            # デカルト座標の(0.9,5.5)と(1.9,5.5)を結ぶ線分を描画
+            x9, y9 = to_pixel_coords(0.9, 5.5)
+            x10, y10 = to_pixel_coords(1.9, 5.5)
+            line5 = self.scene.addLine(x9, y9, x10, y10, QPen(QColor('black')))
+
+            # デカルト座標の(2.95,2.5)と(1.95,2.5)を結ぶ線分を描画
+            x11, y11 = to_pixel_coords(2.95, 2.5)
+            x12, y12 = to_pixel_coords(1.95, 2.5)
+            line6 = self.scene.addLine(x11, y11, x12, y12, QPen(QColor('black')))
+
+            # デカルト座標の(2.95,4.5)と(1.95,4.5)を結ぶ線分を描画
+            x13, y13 = to_pixel_coords(2.95, 4.5)
+            x14, y14 = to_pixel_coords(1.95, 4.5)
+            line7 = self.scene.addLine(x13, y13, x14, y14, QPen(QColor('black')))
+
+            # デカルト座標の(3.5,3.0)と(2.95,3.0)を結ぶ線分を描画
+            x15, y15 = to_pixel_coords(3.5, 3.0)
+            x16, y16 = to_pixel_coords(2.95, 3.0)
+            line8 = self.scene.addLine(x15, y15, x16, y16, QPen(QColor('black')))
+        
+        else:
+            # デカルト座標の(0.9,1.5)と(0.9,5.5)を結ぶ線分を描画
+            x1, y1 = to_pixel_coords(reflect_x(0.9), 1.5)
+            x2, y2 = to_pixel_coords(reflect_x(0.9), 5.5)
+            line1 = self.scene.addLine(x1, y1, x2, y2, QPen(QColor('black')))
+
+            # デカルト座標の(2.95,1.5)と(2.95,5.5)を結ぶ線分を描画
+            x3, y3 = to_pixel_coords(reflect_x(2.95), 1.5)
+            x4, y4 = to_pixel_coords(reflect_x(2.95), 5.5)
+            line2 = self.scene.addLine(x3, y3, x4, y4, QPen(QColor('black')))
+
+            # デカルト座標の(0.9,1.5)と(1.9,1.5)を結ぶ線分を描画
+            x5, y5 = to_pixel_coords(reflect_x(0.9), 1.5)
+            x6, y6 = to_pixel_coords(reflect_x(1.9), 1.5)
+            line3 = self.scene.addLine(x5, y5, x6, y6, QPen(QColor('black')))
+
+            # デカルト座標の(0.9,3.5)と(1.9,3.5)を結ぶ線分を描画
+            x7, y7 = to_pixel_coords(reflect_x(0.9), 3.5)
+            x8, y8 = to_pixel_coords(reflect_x(1.9), 3.5)
+            line4 = self.scene.addLine(x7, y7, x8, y8, QPen(QColor('black')))
+
+            # デカルト座標の(0.9,5.5)と(1.9,5.5)を結ぶ線分を描画
+            x9, y9 = to_pixel_coords(reflect_x(0.9), 5.5)
+            x10, y10 = to_pixel_coords(reflect_x(1.9), 5.5)
+            line5 = self.scene.addLine(x9, y9, x10, y10, QPen(QColor('black')))
+
+            # デカルト座標の(2.95,2.5)と(1.95,2.5)を結ぶ線分を描画
+            x11, y11 = to_pixel_coords(reflect_x(2.95), 2.5)
+            x12, y12 = to_pixel_coords(reflect_x(1.95), 2.5)
+            line6 = self.scene.addLine(x11, y11, x12, y12, QPen(QColor('black')))
+
+            # デカルト座標の(2.95,4.5)と(1.95,4.5)を結ぶ線分を描画
+            x13, y13 = to_pixel_coords(reflect_x(2.95), 4.5)
+            x14, y14 = to_pixel_coords(reflect_x(1.95), 4.5)
+            line7 = self.scene.addLine(x13, y13, x14, y14, QPen(QColor('black')))
+
+            # デカルト座標の(3.5,3.0)と(2.95,3.0)を結ぶ線分を描画
+            x15, y15 = to_pixel_coords(reflect_x(3.5), 3.0)
+            x16, y16 = to_pixel_coords(reflect_x(2.95), 3.0)
+            line8 = self.scene.addLine(x15, y15, x16, y16, QPen(QColor('black')))
+
+
+        self.pose_rect = QGraphicsRectItem(-30, -30, 60, 60)
         self.pose_rect.setBrush(QColor('blue'))
         self.scene.addItem(self.pose_rect)
 
@@ -67,14 +176,17 @@ class PoseVisualizer(QGraphicsView):
 
     def update_pose(self):
         pose = self.ros_node.pose
-        x_pixel = (pose.x + 3.5) * 50
-        y_pixel = (7 - pose.y) * 100
+        if self.field_color == "red":
+            x_pixel = (pose.x + 3.5) * 140 + 30
+        else:
+            x_pixel = pose.x * 140 + 30
+        y_pixel = (7 - pose.y) * 140 + 60
         theta_deg = math.degrees(-pose.theta)
 
         self.pose_rect.setPos(x_pixel, y_pixel)
         self.pose_rect.setRotation(theta_deg)
 
-        self.pose_label.setText(f"x: {pose.x:.2f}, y: {pose.y:.2f}, theta: {pose.theta:.2f}")
+        self.pose_label.setText(f"x: {pose.x:.2f}, y: {pose.y:.2f}, theta: {pose.theta*180/math.pi:.2f}")
 
 
 class BoolPublisherGUI(QWidget):
@@ -83,7 +195,6 @@ class BoolPublisherGUI(QWidget):
         self.ros_node = ros_node
 
         self.setWindowTitle("Bool Publisher & Pose Viewer")
-        self.showFullScreen()
 
         main_layout = QHBoxLayout()
 
@@ -130,7 +241,7 @@ class BoolPublisherGUI(QWidget):
 
         left_layout.addWidget(button_container, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
 
-        self.pose_viewer = PoseVisualizer(ros_node)
+        self.pose_viewer = PoseVisualizer(ros_node, self.ros_node.field_color)
 
         main_layout.addLayout(left_layout)
         main_layout.addWidget(self.pose_viewer)
