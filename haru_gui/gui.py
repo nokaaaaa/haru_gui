@@ -59,23 +59,23 @@ class PoseVisualizer(QGraphicsView):
         self.field_color = field_color
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
-        self.setFixedSize(560, 1120)
+        self.setFixedSize(448, 896)  # 560 * 0.8, 1120 * 0.8
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-        self.scene.setSceneRect(0, 0, 560, 1120)
+        self.scene.setSceneRect(0, 0, 448, 896)  # 560 * 0.8, 1120 * 0.8
 
         # 長方形を描画
-        self.boundary_rect = QGraphicsRectItem(30, 60, 490, 980)  # (x, y, width, height)
+        self.boundary_rect = QGraphicsRectItem(24, 48, 392, 784)  # (x, y, width, height) 30 * 0.8, 60 * 0.8, 490 * 0.8, 980 * 0.8
         self.boundary_rect.setBrush(QColor('transparent'))
         self.boundary_rect.setPen(QColor('black'))
         self.scene.addItem(self.boundary_rect)
 
         # デカルト座標をピクセル座標に変換する関数
         def to_pixel_coords(x, y):
-            x_pixel = 30 + (x / 3.5) * 490
-            y_pixel = 1040 - (y / 7) * 980
+            x_pixel = 24 + (x / 3.5) * 392
+            y_pixel = 832 - (y / 7) * 784
             return x_pixel, y_pixel
         
         # デカルト座標を x=1.75 で反転させる関数
@@ -165,22 +165,22 @@ class PoseVisualizer(QGraphicsView):
             line8 = self.scene.addLine(x15, y15, x16, y16, QPen(QColor('black')))
 
 
-        self.pose_rect = QGraphicsRectItem(-30, -30, 60, 60)
+        self.pose_rect = QGraphicsRectItem(-24, -24, 48, 48)  # -30 * 0.8, -30 * 0.8, 60 * 0.8, 60 * 0.8
         self.pose_rect.setBrush(QColor('blue'))
         self.scene.addItem(self.pose_rect)
 
         self.pose_label = QLabel(self)
         self.pose_label.setStyleSheet("font-size: 16px; color: black;")
-        self.pose_label.setGeometry(10, 10, 200, 50)
+        self.pose_label.setGeometry(8, 8, 160, 40)  # 10 * 0.8, 10 * 0.8, 200 * 0.8, 50 * 0.8
         self.scene.addWidget(self.pose_label)
 
     def update_pose(self):
         pose = self.ros_node.pose
         if self.field_color == "red":
-            x_pixel = (pose.x + 3.5) * 140 + 30
+            x_pixel = (pose.x + 3.5) * 112 + 24  # 140 * 0.8, 30 * 0.8
         else:
-            x_pixel = pose.x * 140 + 30
-        y_pixel = (7 - pose.y) * 140 + 60
+            x_pixel = pose.x * 112 + 24  # 140 * 0.8, 30 * 0.8
+        y_pixel = (7 - pose.y) * 112 + 48  # 140 * 0.8, 60 * 0.8
         theta_deg = math.degrees(-pose.theta)
 
         self.pose_rect.setPos(x_pixel, y_pixel)
@@ -201,7 +201,7 @@ class BoolPublisherGUI(QWidget):
         left_layout = QVBoxLayout()
 
         exit_button = QPushButton("Exit", self)
-        exit_button.setStyleSheet("min-width: 80px; min-height: 40px;")
+        exit_button.setStyleSheet("min-width: 64px; min-height: 32px;")  # 80 * 0.8, 40 * 0.8
         exit_button.clicked.connect(self.close_application)
         left_layout.addWidget(exit_button, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
 
@@ -216,12 +216,12 @@ class BoolPublisherGUI(QWidget):
         button_style = """
         QPushButton {
             border: 2px solid #8f8f91;
-            border-radius: 100px;
+            border-radius: 80px;  # 100 * 0.8
             background-color: #f0f0f0;
-            min-width: 200px;
-            min-height: 200px;
-            max-width: 200px;
-            max-height: 200px;
+            min-width: 160px;  # 200 * 0.8
+            min-height: 160px;  # 200 * 0.8
+            max-width: 160px;  # 200 * 0.8
+            max-height: 160px;  # 200 * 0.8
         }
         QPushButton:pressed {
             background-color: #d0d0d0;
@@ -237,7 +237,7 @@ class BoolPublisherGUI(QWidget):
 
         button_container = QWidget()
         button_container.setLayout(button_layout)
-        button_container.setFixedSize(1000, 1000)  # ボタンの高さを減らす
+        button_container.setFixedSize(800, 800)  # 1000 * 0.8
 
         left_layout.addWidget(button_container, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
 
